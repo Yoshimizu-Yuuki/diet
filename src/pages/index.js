@@ -1,24 +1,18 @@
 import * as React from "react"
 import { Link, graphql } from "gatsby"
 
-import Bio from "../components/bio"
 import Layout from "../components/layout"
 import Seo from "../components/seo"
 
 const BlogIndex = ({ data, location }) => {
   const siteTitle = data.site.siteMetadata?.title || `Title`
-  const posts = data.allMarkdownRemark.nodes
+  const posts = data.allContentfulDiet.nodes
 
   if (posts.length === 0) {
     return (
       <Layout location={location} title={siteTitle}>
         <Seo title="All posts" />
-        <Bio />
-        <p>
-          No blog posts found. Add markdown posts to "content/blog" (or the
-          directory you specified for the "gatsby-source-filesystem" plugin in
-          gatsby-config.js).
-        </p>
+        <p>記事がないよ！</p>
       </Layout>
     )
   }
@@ -26,13 +20,17 @@ const BlogIndex = ({ data, location }) => {
   return (
     <Layout location={location} title={siteTitle}>
       <Seo title="All posts" />
-      <Bio />
       <ol style={{ listStyle: `none` }}>
         {posts.map(post => {
-          const title = post.frontmatter.title || post.fields.slug
+          const date = new Date(post.dateTime)
+          const dateTitle = date.toLocaleString("ja", {
+            year: "numeric",
+            month: "numeric",
+            day: "numeric",
+          })
 
           return (
-            <li key={post.fields.slug}>
+            <li key={post.dateTime}>
               <article
                 className="post-list-item"
                 itemScope
@@ -40,20 +38,11 @@ const BlogIndex = ({ data, location }) => {
               >
                 <header>
                   <h2>
-                    <Link to={post.fields.slug} itemProp="url">
-                      <span itemProp="headline">{title}</span>
+                    <Link to={post.contentful_id} itemProp="url">
+                      <span itemProp="headline">{dateTitle}</span>
                     </Link>
                   </h2>
-                  <small>{post.frontmatter.date}</small>
                 </header>
-                <section>
-                  <p
-                    dangerouslySetInnerHTML={{
-                      __html: post.frontmatter.description || post.excerpt,
-                    }}
-                    itemProp="description"
-                  />
-                </section>
               </article>
             </li>
           )
@@ -72,17 +61,18 @@ export const pageQuery = graphql`
         title
       }
     }
-    allMarkdownRemark(sort: { fields: [frontmatter___date], order: DESC }) {
+    allContentfulDiet {
       nodes {
-        excerpt
-        fields {
-          slug
-        }
-        frontmatter {
-          date(formatString: "MMMM DD, YYYY")
-          title
-          description
-        }
+        id
+        contentful_id
+        dateTime
+        weight
+        breakfast
+        lunch
+        dinner
+        snack
+        exercise
+        aword
       }
     }
   }
